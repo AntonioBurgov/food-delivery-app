@@ -1,0 +1,129 @@
+<!-- Cover Image -->
+<div class="cover-image">
+  <img [src]="restaurant.coverImageUrl" [alt]="restaurant.name" />
+  <div class="cover-overlay"></div>
+  <div class="cover-content">
+    <a routerLink="/" class="back-btn">← Back</a>
+    <h1>{{ restaurant.name }}</h1>
+    <div class="restaurant-meta">
+      <span>⭐ {{ restaurant.rating }}</span>
+      <span>🕐 {{ restaurant.estimatedDeliveryMinutes }} min</span>
+      <span>🚚 ${{ restaurant.deliveryFee }} delivery</span>
+      <span>📍 {{ restaurant.city }}</span>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="page-container">
+  <div class="content-layout">
+
+    <!-- Left: Menu -->
+    <div class="menu-section">
+
+      <!-- Category Tabs -->
+      <div class="category-tabs">
+        <button
+          *ngFor="let cat of categoryLabels"
+          class="tab-btn"
+          [class.active]="selectedCategory === cat"
+          (click)="selectedCategory = cat"
+        >
+          {{ cat }}
+        </button>
+      </div>
+
+      <!-- Menu Items by Category -->
+      <ng-container *ngFor="let group of itemsByCategory">
+        <div
+          class="menu-group"
+          *ngIf="selectedCategory === 'All' || selectedCategory === group.label"
+        >
+          <h2 class="group-title">{{ group.label }}</h2>
+          <div class="menu-grid">
+            <div
+              *ngFor="let item of group.items"
+              class="menu-card"
+              [class.unavailable]="!item.isAvailable"
+            >
+              <div class="menu-card-image">
+                <img [src]="item.imageUrl" [alt]="item.name" />
+                <span class="unavailable-badge" *ngIf="!item.isAvailable">Unavailable</span>
+              </div>
+              <div class="menu-card-body">
+                <h3>{{ item.name }}</h3>
+                <p>{{ item.description }}</p>
+                <div class="menu-card-footer">
+                  <span class="price">${{ item.price.toFixed(2) }}</span>
+                  <div class="quantity-control" *ngIf="getCartQuantity(item.id) > 0; else addBtn">
+                    <button class="qty-btn" (click)="removeFromCart(item.id)">−</button>
+                    <span class="qty-value">{{ getCartQuantity(item.id) }}</span>
+                    <button class="qty-btn" (click)="addToCart(item)">+</button>
+                  </div>
+                  <ng-template #addBtn>
+                    <button
+                      class="add-btn"
+                      [disabled]="!item.isAvailable"
+                      (click)="addToCart(item)"
+                    >
+                      + Add
+                    </button>
+                  </ng-template>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- Right: Cart Summary -->
+    <div class="cart-summary" [class.has-items]="cartItems.length > 0">
+      <h2>🛒 Your Order</h2>
+
+      <div class="empty-cart" *ngIf="cartItems.length === 0">
+        <p>Add items to start your order</p>
+      </div>
+
+      <ng-container *ngIf="cartItems.length > 0">
+        <div class="cart-items">
+          <div *ngFor="let cartItem of cartItems" class="cart-item">
+            <div class="cart-item-info">
+              <span class="cart-item-name">{{ cartItem.name }}</span>
+              <span class="cart-item-price">${{ (cartItem.price * cartItem.quantity).toFixed(2) }}</span>
+            </div>
+            <div class="cart-item-controls">
+              <button class="qty-btn small" (click)="removeFromCart(cartItem.id)">−</button>
+              <span>{{ cartItem.quantity }}</span>
+              <button class="qty-btn small" (click)="addToCart(cartItem)">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cart-totals">
+          <div class="total-row">
+            <span>Subtotal</span>
+            <span>${{ cartTotal.toFixed(2) }}</span>
+          </div>
+          <div class="total-row">
+            <span>Delivery</span>
+            <span>${{ restaurant.deliveryFee.toFixed(2) }}</span>
+          </div>
+          <div class="total-row grand-total">
+            <span>Total</span>
+            <span>${{ (cartTotal + restaurant.deliveryFee).toFixed(2) }}</span>
+          </div>
+        </div>
+
+        <a routerLink="/checkout" class="checkout-btn">
+          Proceed to Checkout →
+        </a>
+
+        <p class="min-order-note" *ngIf="cartTotal < restaurant.minOrder">
+          ⚠️ Minimum order is ${{ restaurant.minOrder }}
+        </p>
+      </ng-container>
+    </div>
+
+  </div>
+</div>

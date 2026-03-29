@@ -1,0 +1,39 @@
+<nav class="navbar">
+  <div class="nav-container">
+
+    <!-- Logo -->
+    <a routerLink="/" class="nav-logo">
+      🍔 <span>FoodRush</span>
+    </a>
+
+    <!-- Desktop Nav -->
+    <div class="nav-links" [class.open]="isMenuOpen">
+      <a routerLink="/" class="nav-link">Home</a>
+
+      <ng-container *ngIf="currentUser; else guestLinks">
+        <a routerLink="/orders" class="nav-link">My Orders</a>
+        <div class="user-menu">
+          <span class="user-name">👤 {{ currentUser.fullName.split(' ')[0] }}</span>
+          <button class="logout-btn" (click)="logout()">Logout</button>
+        </div>
+      </ng-container>
+
+      <ng-template #guestLinks>
+        <a routerLink="/auth/login" class="nav-link">Login</a>
+        <a routerLink="/auth/register" class="nav-btn">Sign Up</a>
+      </ng-template>
+
+      <!-- Cart -->
+      <a routerLink="/cart" class="cart-icon">
+        🛒
+        <span class="cart-badge" *ngIf="cartItemCount > 0">{{ cartItemCount }}</span>
+      </a>
+    </div>
+
+    <!-- Mobile Hamburger -->
+    <button class="hamburger" (click)="toggleMenu()">
+      <span></span><span></span><span></span>
+    </button>
+
+  </div>
+</nav>

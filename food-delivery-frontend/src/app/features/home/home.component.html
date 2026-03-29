@@ -1,0 +1,97 @@
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-content">
+    <h1>Hungry? <span>We've got you.</span></h1>
+    <p>Order from the best restaurants in your city. Fast delivery, great food.</p>
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        placeholder="Search restaurants or cuisines..."
+        [(ngModel)]="searchQuery"
+      />
+    </div>
+  </div>
+</section>
+
+<!-- Categories -->
+<section class="categories-section">
+  <div class="container">
+    <h2>What are you craving?</h2>
+    <div class="categories-grid">
+      <button
+        *ngFor="let cat of categories"
+        class="category-btn"
+        [class.active]="selectedCategory === cat.name"
+        (click)="selectCategory(cat.name)"
+      >
+        <span class="cat-icon">{{ cat.icon }}</span>
+        <span class="cat-name">{{ cat.name }}</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- Restaurants -->
+<section class="restaurants-section">
+  <div class="container">
+
+    <div class="section-header">
+      <h2>
+        {{ selectedCategory === 'All' ? 'All Restaurants' : selectedCategory + ' Restaurants' }}
+      </h2>
+      <span class="results-count" *ngIf="!isLoading">
+        {{ filteredRestaurants.length }} places
+      </span>
+    </div>
+
+    <!-- Loading Skeleton -->
+    <div class="restaurants-grid" *ngIf="isLoading">
+      <div *ngFor="let i of [1,2,3,4,5,6]" class="skeleton-card">
+        <div class="skeleton-image"></div>
+        <div class="skeleton-body">
+          <div class="skeleton-line wide"></div>
+          <div class="skeleton-line medium"></div>
+          <div class="skeleton-line narrow"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No results -->
+    <div class="no-results" *ngIf="!isLoading && filteredRestaurants.length === 0">
+      <p>😕 No restaurants found. Try a different search.</p>
+    </div>
+
+    <!-- Restaurant Cards -->
+    <div class="restaurants-grid" *ngIf="!isLoading">
+      <ng-container *ngFor="let restaurant of filteredRestaurants">
+        <a [routerLink]="['/restaurants', restaurant.id]" class="restaurant-card">
+          <div class="card-image">
+            <img
+              [src]="restaurant.coverImageUrl || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=250&fit=crop'"
+              [alt]="restaurant.name"
+            />
+            <span class="category-tag">{{ restaurant.category }}</span>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <h3>{{ restaurant.name }}</h3>
+              <div class="rating">
+                <span class="stars">⭐</span>
+                <span class="rating-value">{{ restaurant.rating }}</span>
+              </div>
+            </div>
+            <div class="card-meta">
+              <span class="meta-item">🕐 {{ restaurant.estimatedDeliveryMinutes }} min</span>
+              <span class="meta-divider">·</span>
+              <span class="meta-item">🚚 ${{ restaurant.deliveryFee }} delivery</span>
+              <span class="meta-divider">·</span>
+              <span class="meta-item">Min ${{ restaurant.minOrderAmount }}</span>
+            </div>
+          </div>
+        </a>
+      </ng-container>
+    </div>
+
+  </div>
+</section>

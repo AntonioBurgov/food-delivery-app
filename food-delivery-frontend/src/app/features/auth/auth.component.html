@@ -1,0 +1,201 @@
+<div class="auth-page">
+  <div class="auth-container">
+
+    <div class="auth-left">
+      <div class="auth-left-content">
+        <div class="logo">🍔 FoodRush</div>
+        <h1>{{ isLoginMode ? 'Welcome back!' : 'Join FoodRush' }}</h1>
+        <p>
+          {{ isLoginMode
+            ? 'Log in to order from your favourite restaurants.'
+            : 'Create an account and start ordering delicious food.' }}
+        </p>
+        <div class="features">
+          <div class="feature-item">
+            <span class="feature-icon">🚀</span>
+            <span>Fast delivery to your door</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">🍕</span>
+            <span>Hundreds of restaurants</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">💳</span>
+            <span>Safe and secure payments</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">📍</span>
+            <span>Real-time order tracking</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="auth-right">
+      <div class="form-card">
+
+        <div class="auth-tabs">
+          <button class="auth-tab" [class.active]="isLoginMode" (click)="isLoginMode = true; errorMessage = ''">
+            Login
+          </button>
+          <button class="auth-tab" [class.active]="!isLoginMode" (click)="isLoginMode = false; errorMessage = ''">
+            Register
+          </button>
+        </div>
+
+        <div class="alert success" *ngIf="successMessage">✅ {{ successMessage }}</div>
+        <div class="alert error" *ngIf="errorMessage">❌ {{ errorMessage }}</div>
+
+        <!-- LOGIN FORM -->
+        <form *ngIf="isLoginMode" (ngSubmit)="onLogin()">
+          <div class="form-group">
+            <label>Email Address</label>
+            <div class="input-wrapper">
+              <span class="input-icon">✉️</span>
+              <input
+                type="email"
+                placeholder="you&#64;example.com"
+                [(ngModel)]="loginData.email"
+                name="email"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>
+              Password
+              <a href="#" class="forgot-link">Forgot password?</a>
+            </label>
+            <div class="input-wrapper">
+              <span class="input-icon">🔒</span>
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                placeholder="Enter your password"
+                [(ngModel)]="loginData.password"
+                name="password"
+              />
+              <button type="button" class="toggle-pw" (click)="showPassword = !showPassword">
+                {{ showPassword ? '🙈' : '👁️' }}
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn" [disabled]="!isLoginValid() || isLoading">
+            <span *ngIf="!isLoading">Log In</span>
+            <span *ngIf="isLoading">⏳ Logging in...</span>
+          </button>
+
+          <p class="switch-mode">
+            Don't have an account?
+            <button type="button" (click)="switchMode()">Register</button>
+          </p>
+        </form>
+
+        <!-- REGISTER FORM -->
+        <form *ngIf="!isLoginMode" (ngSubmit)="onRegister()">
+          <div class="form-group">
+            <label>Full Name</label>
+            <div class="input-wrapper">
+              <span class="input-icon">👤</span>
+              <input
+                type="text"
+                placeholder="John Doe"
+                [(ngModel)]="registerData.fullName"
+                name="fullName"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Email Address</label>
+            <div class="input-wrapper">
+              <span class="input-icon">✉️</span>
+              <input
+                type="email"
+                placeholder="you&#64;example.com"
+                [(ngModel)]="registerData.email"
+                name="email"
+              />
+            </div>
+            <span class="field-error" *ngIf="registerData.email && !isValidEmail(registerData.email)">
+              Please enter a valid email
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label>Phone Number</label>
+            <div class="input-wrapper">
+              <span class="input-icon">📱</span>
+              <input
+                type="tel"
+                placeholder="+1 234 567 8900"
+                [(ngModel)]="registerData.phone"
+                name="phone"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Password</label>
+            <div class="input-wrapper">
+              <span class="input-icon">🔒</span>
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                placeholder="At least 6 characters"
+                [(ngModel)]="registerData.password"
+                name="password"
+              />
+              <button type="button" class="toggle-pw" (click)="showPassword = !showPassword">
+                {{ showPassword ? '🙈' : '👁️' }}
+              </button>
+            </div>
+            <div class="password-strength" *ngIf="registerData.password">
+              <div class="strength-bar">
+                <div
+                  class="strength-fill"
+                  [style.width]="getPasswordStrength().width"
+                  [style.background]="getPasswordStrength().color"
+                ></div>
+              </div>
+              <span class="strength-label" [style.color]="getPasswordStrength().color">
+                {{ getPasswordStrength().label }}
+              </span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Confirm Password</label>
+            <div class="input-wrapper">
+              <span class="input-icon">🔒</span>
+              <input
+                [type]="showConfirmPassword ? 'text' : 'password'"
+                placeholder="Repeat your password"
+                [(ngModel)]="registerData.confirmPassword"
+                name="confirmPassword"
+              />
+              <button type="button" class="toggle-pw" (click)="showConfirmPassword = !showConfirmPassword">
+                {{ showConfirmPassword ? '🙈' : '👁️' }}
+              </button>
+            </div>
+            <span class="field-error"
+              *ngIf="registerData.confirmPassword && registerData.password !== registerData.confirmPassword">
+              Passwords do not match
+            </span>
+          </div>
+
+          <button type="submit" class="submit-btn" [disabled]="!isRegisterValid() || isLoading">
+            <span *ngIf="!isLoading">Register</span>
+            <span *ngIf="isLoading">⏳ Creating account...</span>
+          </button>
+
+          <p class="switch-mode">
+            Already have an account?
+            <button type="button" (click)="switchMode()">Log in</button>
+          </p>
+        </form>
+
+      </div>
+    </div>
+
+  </div>
+</div>

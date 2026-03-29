@@ -1,0 +1,182 @@
+<div class="orders-page">
+  <div class="container">
+
+    <div class="page-header">
+      <h1>My Orders</h1>
+      <a routerLink="/" class="browse-link">+ Order Again</a>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-orders" *ngIf="orders.length === 0">
+      <div class="empty-icon">📦</div>
+      <h2>No orders yet</h2>
+      <p>Your order history will appear here once you place an order.</p>
+      <a routerLink="/" class="browse-btn">Browse Restaurants</a>
+    </div>
+
+    <!-- Orders Layout -->
+    <div class="orders-layout" *ngIf="orders.length > 0">
+
+      <!-- Orders List -->
+      <div class="orders-list">
+        <ng-container *ngFor="let order of orders">
+          <div
+            class="order-card"
+            [class.selected]="selectedOrder?.id === order.id"
+            [class.cancelled]="isCancelled(order)"
+            (click)="selectOrder(order)"
+          >
+            <div class="order-card-left">
+              <!-- Logo -->
+              <div class="restaurant-logo-wrapper">
+                <img
+                  *ngIf="order.restaurantLogo"
+                  [src]="order.restaurantLogo"
+                  [alt]="order.restaurantName"
+                  class="restaurant-logo"
+                />
+                <div *ngIf="!order.restaurantLogo" class="restaurant-logo-placeholder">
+                  🍽️
+                </div>
+              </div>
+              <div class="order-info">
+                <h3>{{ order.restaurantName }}</h3>
+                <p class="order-items-preview">{{ getItemsPreview(order.items) }}</p>
+                <div class="order-meta">
+                  <span class="order-id">#{{ order.id }}</span>
+                  <span class="order-date">{{ order.createdAt | date: 'MMM d, y' }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="order-card-right">
+              <span
+                class="status-badge"
+                [style.background]="getStatusColor(order.status) + '20'"
+                [style.color]="getStatusColor(order.status)"
+              >
+                {{ getStatusLabel(order.status) }}
+              </span>
+              <span class="order-total">${{ order.total.toFixed(2) }}</span>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- Order Detail Panel -->
+      <div class="order-detail" *ngIf="selectedOrder">
+
+        <div class="detail-header">
+          <div class="detail-title">
+            <h2>Order #{{ selectedOrder.id }}</h2>
+            <span
+              class="status-badge large"
+              [style.background]="getStatusColor(selectedOrder.status) + '20'"
+              [style.color]="getStatusColor(selectedOrder.status)"
+            >
+              {{ getStatusLabel(selectedOrder.status) }}
+            </span>
+          </div>
+          <button class="close-btn" (click)="closeDetail()">✕</button>
+        </div>
+
+        <!-- Status Timeline -->
+        <div class="timeline" *ngIf="isNotCancelled(selectedOrder)">
+          <div
+            *ngFor="let step of statusSteps; let i = index"
+            class="timeline-step"
+            [class.completed]="i <= getStatusIndex(selectedOrder.status)"
+            [class.active]="i === getStatusIndex(selectedOrder.status)"
+          >
+            <div class="step-icon-wrapper">
+              <div class="step-icon">{{ step.icon }}</div>
+              <div
+                class="step-line"
+                *ngIf="i < statusSteps.length - 1"
+                [class.filled]="i < getStatusIndex(selectedOrder.status)"
+              ></div>
+            </div>
+            <div class="step-label">{{ step.label }}</div>
+          </div>
+        </div>
+
+        <!-- Cancelled Banner -->
+        <div class="cancelled-banner" *ngIf="isCancelled(selectedOrder)">
+          ❌ This order was cancelled
+        </div>
+
+        <!-- ETA Banner -->
+        <div class="eta-banner" *ngIf="isOnTheWay(selectedOrder)">
+          <span class="eta-icon">🚚</span>
+          <div>
+            <p class="eta-label">Estimated arrival</p>
+            <p class="eta-time">{{ selectedOrder.estimatedDelivery }}</p>
+          </div>
+        </div>
+
+        <!-- Restaurant Info with Logo -->
+        <div class="detail-restaurant">
+          <div class="detail-restaurant-logo-wrapper">
+            <img
+              *ngIf="selectedOrder.restaurantLogo"
+              [src]="selectedOrder.restaurantLogo"
+              [alt]="selectedOrder.restaurantName"
+              class="detail-restaurant-logo"
+            />
+            <div *ngIf="!selectedOrder.restaurantLogo" class="detail-logo-placeholder">🍽️</div>
+          </div>
+          <div class="detail-restaurant-cover">
+            <img
+              *ngIf="selectedOrder.restaurantImage"
+              [src]="selectedOrder.restaurantImage"
+              [alt]="selectedOrder.restaurantName"
+              class="detail-cover-img"
+            />
+          </div>
+          <div class="detail-restaurant-info">
+            <p class="detail-restaurant-name">{{ selectedOrder.restaurantName }}</p>
+            <p class="detail-date">{{ selectedOrder.createdAt | date: 'MMMM d, y' }}</p>
+          </div>
+        </div>
+
+        <!-- Order Items -->
+        <div class="detail-items">
+          <h3>Items</h3>
+          <div *ngFor="let item of selectedOrder.items" class="detail-item">
+            <span class="detail-item-qty">x{{ item.quantity }}</span>
+            <span class="detail-item-name">{{ item.name }}</span>
+            <span class="detail-item-price">${{ (item.price * item.quantity).toFixed(2) }}</span>
+          </div>
+        </div>
+
+        <!-- Totals -->
+        <div class="detail-totals">
+          <div class="detail-total-row">
+            <span>Subtotal</span>
+            <span>${{ getOrderSubtotal(selectedOrder).toFixed(2) }}</span>
+          </div>
+          <div class="detail-total-row">
+            <span>Delivery fee</span>
+            <span>${{ (selectedOrder.total - getOrderSubtotal(selectedOrder)).toFixed(2) }}</span>
+          </div>
+          <div class="detail-total-row grand">
+            <span>Total</span>
+            <span>${{ selectedOrder.total.toFixed(2) }}</span>
+          </div>
+        </div>
+
+        <!-- Reorder Button -->
+        <ng-container *ngIf="isDelivered(selectedOrder)">
+          <a routerLink="/" class="reorder-btn">🔄 Order Again</a>
+        </ng-container>
+
+      </div>
+
+      <!-- Placeholder -->
+      <div class="detail-placeholder" *ngIf="!selectedOrder">
+        <div class="placeholder-icon">👈</div>
+        <p>Select an order to see details</p>
+      </div>
+
+    </div>
+  </div>
+</div>

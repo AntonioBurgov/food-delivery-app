@@ -1,0 +1,89 @@
+<div class="cart-page">
+  <div class="container">
+
+    <div class="page-header">
+      <a routerLink="/" class="back-link">← Continue Shopping</a>
+      <h1>Your Cart
+        <span class="item-count" *ngIf="cartItems.length > 0">
+          {{ totalItems }} {{ totalItems === 1 ? 'item' : 'items' }}
+        </span>
+      </h1>
+    </div>
+
+    <!-- Empty Cart -->
+    <div class="empty-cart" *ngIf="cartItems.length === 0">
+      <div class="empty-cart-icon">🛒</div>
+      <h2>Your cart is empty</h2>
+      <p>Looks like you haven't added anything yet.</p>
+      <a routerLink="/" class="browse-btn">Browse Restaurants</a>
+    </div>
+
+    <!-- Cart Content -->
+    <div class="cart-layout" *ngIf="cartItems.length > 0">
+
+      <div class="cart-items-section">
+        <div class="cart-items-header">
+          <h2>Order from <span>{{ restaurantName }}</span></h2>
+          <button class="clear-btn" (click)="clearCart()">🗑️ Clear all</button>
+        </div>
+
+        <div class="cart-item" *ngFor="let item of cartItems">
+          <div class="item-image">
+            <img [src]="item.image" [alt]="item.name" />
+          </div>
+          <div class="item-details">
+            <h3>{{ item.name }}</h3>
+            <p class="item-price">${{ item.price.toFixed(2) }} each</p>
+          </div>
+          <div class="item-controls">
+            <div class="quantity-control">
+              <button class="qty-btn" (click)="decreaseQuantity(item.id)">−</button>
+              <span class="qty-value">{{ item.quantity }}</span>
+              <button class="qty-btn" (click)="increaseQuantity(item.id)">+</button>
+            </div>
+            <p class="item-total">${{ (item.price * item.quantity).toFixed(2) }}</p>
+            <button class="remove-btn" (click)="removeItem(item.id)">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="order-summary">
+        <h2>Order Summary</h2>
+        <div class="summary-rows">
+          <div class="summary-row">
+            <span>Subtotal ({{ totalItems }} items)</span>
+            <span>${{ subtotal.toFixed(2) }}</span>
+          </div>
+          <div class="summary-row">
+            <span>Delivery fee</span>
+            <span>${{ deliveryFee.toFixed(2) }}</span>
+          </div>
+          <div class="summary-row discount">
+            <span>🎉 First order discount</span>
+            <span>-$0.00</span>
+          </div>
+          <div class="summary-divider"></div>
+          <div class="summary-row total">
+            <span>Total</span>
+            <span>${{ total.toFixed(2) }}</span>
+          </div>
+        </div>
+
+        <a routerLink="/checkout" class="checkout-btn">
+          Proceed to Checkout →
+        </a>
+
+        <div class="payment-icons">
+          <span>We accept:</span>
+          <div class="icons">
+            <span class="payment-icon visa">VISA</span>
+            <span class="payment-icon apple">🍎 Pay</span>
+            <span class="payment-icon cash">💵 Cash</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
